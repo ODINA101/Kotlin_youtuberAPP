@@ -87,24 +87,26 @@ class MainActivity : AppCompatActivity() {
               if(lastItems != null) {
              println("new items aded ")
                   myitems.items = myitems.items.plus(lastItems.items)
-                  myitems.nextPageToken = homeFeed.nextPageToken
                   println(myitems.items.size)
 
-                  viewManager.scrollToPositionWithOffset(myitems.items.size - 10, 0)
+                  viewManager.scrollToPositionWithOffset(myitems.items.size - 13, 0)
 
                    }
+                    recyclerView.layoutManager = layoutManager
 
+                   if(add) {
+                       myitems.nextPageToken = lastItems!!.nextPageToken
+
+                   }
                     if(!add) {
                         myitems = homeFeed
-
+                        recyclerView.adapter = MyAdapter(myitems)
 
                     }
 
-                recyclerView.layoutManager = layoutManager
-                    recyclerView.adapter = MyAdapter(myitems)
-
 
                     recyclerView.adapter.notifyDataSetChanged()
+                   // recyclerView.adapter.notifyDataSetChanged()
 
                     var loading = true
                     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
