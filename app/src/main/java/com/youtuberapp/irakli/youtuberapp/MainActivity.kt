@@ -1,5 +1,6 @@
 package com.youtuberapp.irakli.youtuberapp
 import android.os.Bundle
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.CardView
 import android.support.v7.widget.LinearLayoutManager
@@ -16,7 +17,7 @@ import okhttp3.*
 import java.io.IOException
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity()  {
     var nextPageToken: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,15 +48,15 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        fetchJson("https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&type=videos&channelId=UCtz3sMM1qPIm1WrbhaJexaA&maxResults=10&key=AIzaSyDyIXJHb0clHIW60pG8OR_G8XRuaUtVqHk",null,false)
+        fetchJson("https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&type=videos&channelId=UCtz3sMM1qPIm1WrbhaJexaA&maxResults=50&key=AIzaSyDyIXJHb0clHIW60pG8OR_G8XRuaUtVqHk")
 
 
     }
 
         lateinit var myitems:items
+        var sec = 0
 
-
-    fun fetchJson(url:String, lastItems: items?, add: Boolean) {
+    fun fetchJson(url:String) {
         println("Attempting to Fetch JSON")
 
 
@@ -67,46 +68,27 @@ class MainActivity : AppCompatActivity() {
                 val body = response?.body()?.string()
 
                 val gson = GsonBuilder().create()
-                var homeFeed = gson.fromJson(body, items::class.java)
+                var myitems = gson.fromJson(body, items::class.java)
 
-
-
-/* if(add) {
-     if (lastItems != null) {
-         lastItems.items = lastItems!!.items.plus(gson.fromJson(body, items::class.java).items)
-         lastItems!!.nextPageToken = gson.fromJson(body, items::class.java).nextPageToken
-         println("new elements aded")
-
-     }
-     val homeFeed = lastItems
- }*/
                 var viewManager = LinearLayoutManager(this@MainActivity)
                 var  layoutManager = viewManager
                 runOnUiThread {
                     var recyclerView  = findViewById<RecyclerView>(R.id.videosrecycler)
-              if(lastItems != null) {
-             println("new items aded ")
-                  myitems.items = myitems.items.plus(lastItems.items)
-                  println(myitems.items.size)
 
-                  viewManager.scrollToPositionWithOffset(myitems.items.size - 13, 0)
+                    println("new items aded ")
 
-                   }
+
+                // viewManager.scrollToPositionWithOffset(myitems.items.size - 49, 0)
+
                     recyclerView.layoutManager = layoutManager
 
-                   if(add) {
-                       myitems.nextPageToken = lastItems!!.nextPageToken
 
-                   }
-                    if(!add) {
-                        myitems = homeFeed
-                        recyclerView.adapter = MyAdapter(myitems)
-
-                    }
+                       recyclerView.adapter = MyAdapter(myitems)
+                       recyclerView!!.adapter.notifyDataSetChanged()
 
 
-                    recyclerView.adapter.notifyDataSetChanged()
-                   // recyclerView.adapter.notifyDataSetChanged()
+
+
 
                     var loading = true
                     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -127,10 +109,17 @@ class MainActivity : AppCompatActivity() {
                                         loading = false
                                         println("Last Item Wow !")
                                         //Do pagination.. i.e. fetch new data
-                                                var next = MyAdapter(homeFeed).nextPage()
+                                        sec++
+                                        recyclerView!!.adapter.notifyDataSetChanged()
+
+                                        var next:String = MyAdapter(myitems).nextPage()
 
 
-                                            fetchJson("https://www.googleapis.com/youtube/v3/search?order=date&pageToken=$next&part=snippet&type=videos&channelId=UCtz3sMM1qPIm1WrbhaJexaA&maxResults=10&key=AIzaSyDyIXJHb0clHIW60pG8OR_G8XRuaUtVqHk", homeFeed, true)
+
+
+
+
+                                            fetchJson("https://www.googleapis.com/youtube/v3/search?order=date&pageToken=$next&part=snippet&type=videos&channelId=UCtz3sMM1qPIm1WrbhaJexaA&maxResults=50&key=AIzaSyDyIXJHb0clHIW60pG8OR_G8XRuaUtVqHk")
 
 
 
